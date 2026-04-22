@@ -1,0 +1,93 @@
+
+<!DOCTYPE html>
+<html lang="mn">
+<head>
+    <meta charset="UTF-8">
+    <title>Prezi Style Zoom Demo</title>
+    <style>
+        /* Ерөнхий загвар */
+        body {
+            background: radial-gradient(circle, #2b2b2b, #000000);
+            color: white;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            overflow: hidden;
+        }
+
+        /* Слайд бүрийн загвар */
+        .step {
+            width: 800px;
+            height: 500px;
+            padding: 40px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 0 20px rgba(0,0,0,0.5);
+            text-align: center;
+            opacity: 0.1;
+            transition: opacity 1s;
+        }
+
+        .step.active {
+            opacity: 1;
+        }
+
+        h1 { font-size: 60px; color: #00d2ff; margin-bottom: 20px; }
+        p { font-size: 24px; line-height: 1.5; }
+
+        /* Туслах хэсэг */
+        .hint {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: #aaa;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+
+<div id="impress">
+    
+    <div id="intro" class="step" data-x="0" data-y="0">
+        <h1>Эхлэл</h1>
+        <p>Энэ бол вэб дээрх нисдэг танилцуулга.<br><b>Сумаар удирдаарай.</b></p>
+    </div>
+
+    <div id="zoom" class="step" data-x="1500" data-y="0" data-scale="4">
+        <h1>Zoom Эффект</h1>
+        <p>Бид маш хол байсан ч "нисэж" ойртлоо.</p>
+    </div>
+
+    <div id="rotate" class="step" data-x="1500" data-y="2000" data-rotate="90" data-scale="1">
+        <h1>Эргэлт</h1>
+        <p>Дэлгэц 90 градус эргэж байна.</p>
+    </div>
+
+    <div id="3d" class="step" data-x="3500" data-y="2000" data-z="-3000" data-rotate-y="45">
+        <h1>3D Орон зай</h1>
+        <p>Z тэнхлэг ашиглан орон зайн гүнд очлоо.</p>
+    </div>
+
+    <div id="overview" class="step" data-x="1500" data-y="1000" data-scale="10" data-rotate-x="20">
+        <h1 style="color: #ffde59;">Нийт дүр зураг</h1>
+        <p>Бид бүх слайдыг дээрээс нь харж байна.</p>
+    </div>
+
+</div>
+
+<div class="hint">Удирдахын тулд Сум (Arrow Keys) эсвэл Space дараарай.</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/impress.js/2.0.0/impress.min.js"></script>
+<script>
+    // Идэвхжүүлэх
+    const rootElement = document.getElementById( "impress" );
+    impress().init();
+</script>
+
+</body>
+</html>
