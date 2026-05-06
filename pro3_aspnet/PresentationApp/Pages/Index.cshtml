@@ -1,0 +1,196 @@
+@page
+@model IndexModel
+@{
+    ViewData["Title"] = "ASP.NET Core + impress.js Presentation";
+    Layout = "/Pages/Shared/_Layout.cshtml";
+
+    string GetAttr(string slideId, string attr, string defaultVal) {
+        if (Model.SlidePositions.TryGetValue(slideId, out var pos)) {
+            return attr switch {
+                "x" => pos.X.ToString(System.Globalization.CultureInfo.InvariantCulture),
+                "y" => pos.Y.ToString(System.Globalization.CultureInfo.InvariantCulture),
+                "z" => pos.Z.ToString(System.Globalization.CultureInfo.InvariantCulture),
+                "rotate-x" => pos.RotateX.ToString(System.Globalization.CultureInfo.InvariantCulture),
+                "rotate-y" => pos.RotateY.ToString(System.Globalization.CultureInfo.InvariantCulture),
+                "rotate" => pos.RotateZ.ToString(System.Globalization.CultureInfo.InvariantCulture),
+                "scale" => pos.Scale.ToString(System.Globalization.CultureInfo.InvariantCulture),
+                _ => defaultVal
+            };
+        }
+        return defaultVal;
+    }
+}
+
+<style>
+    html, body {
+        background: @Model.BackgroundColor !important;
+        @if (!string.IsNullOrEmpty(Model.BackgroundImage))
+        {
+            <text>
+            background-image: url('@Model.BackgroundImage') !important;
+            background-size: cover !important;
+            background-position: center !important;
+            background-repeat: no-repeat !important;
+            </text>
+        }
+    }
+    
+    #impress {
+        background: @Model.BackgroundColor !important;
+    }
+</style>
+
+<div id="presentation-container">
+    <!-- Slide 1: Title Slide -->
+    <div id="slide-1" class="step slide" data-x="@GetAttr("slide-1", "x", "0")" data-y="@GetAttr("slide-1", "y", "0")" data-z="@GetAttr("slide-1", "z", "0")" data-rotate-x="@GetAttr("slide-1", "rotate-x", "0")" data-rotate-y="@GetAttr("slide-1", "rotate-y", "0")" data-rotate="@GetAttr("slide-1", "rotate", "0")" data-scale="@GetAttr("slide-1", "scale", "1")">
+        <div class="slide-content title-slide">
+            <h1>ASP.NET Core + impress.js</h1>
+            <p class="subtitle">Building Interactive Presentations</p>
+            <div class="speaker-notes">May 4, 2026</div>
+        </div>
+    </div>
+
+    <!-- Slide 2: What is impress.js? -->
+    <div id="slide-2" class="step slide" data-x="@GetAttr("slide-2", "x", "1000")" data-y="@GetAttr("slide-2", "y", "0")" data-z="@GetAttr("slide-2", "z", "0")" data-rotate-x="@GetAttr("slide-2", "rotate-x", "0")" data-rotate-y="@GetAttr("slide-2", "rotate-y", "0")" data-rotate="@GetAttr("slide-2", "rotate", "0")" data-scale="@GetAttr("slide-2", "scale", "1")">
+        <div class="slide-content">
+            <h2>What is impress.js?</h2>
+            <ul>
+                <li>JavaScript library for creating presentations</li>
+                <li>Uses CSS 3D transforms and transitions</li>
+                <li>Navigate with arrow keys or swipe</li>
+                <li>Create non-linear, spatial presentations</li>
+            </ul>
+            <div class="note">impress.js makes presentations fun and engaging!</div>
+        </div>
+    </div>
+
+    <!-- Slide 3: ASP.NET Core Features -->
+    <div id="slide-3" class="step slide" data-x="@GetAttr("slide-3", "x", "2000")" data-y="@GetAttr("slide-3", "y", "0")" data-z="@GetAttr("slide-3", "z", "0")" data-rotate-x="@GetAttr("slide-3", "rotate-x", "0")" data-rotate-y="@GetAttr("slide-3", "rotate-y", "0")" data-rotate="@GetAttr("slide-3", "rotate", "0")" data-scale="@GetAttr("slide-3", "scale", "1")">
+        <div class="slide-content">
+            <h2>ASP.NET Core Features</h2>
+            <div class="feature-grid">
+                <div class="feature-box">
+                    <h3>🚀 Performance</h3>
+                    <p>High-speed web framework</p>
+                </div>
+                <div class="feature-box">
+                    <h3>🔒 Security</h3>
+                    <p>Built-in security features</p>
+                </div>
+                <div class="feature-box">
+                    <h3>📱 Cross-platform</h3>
+                    <p>Windows, Linux, macOS</p>
+                </div>
+                <div class="feature-box">
+                    <h3>⚡ Modern</h3>
+                    <p>Latest C# & .NET features</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Slide 4: 3D Effect Demo -->
+    <div id="slide-4" class="step slide" data-x="@GetAttr("slide-4", "x", "1000")" data-y="@GetAttr("slide-4", "y", "1000")" data-z="@GetAttr("slide-4", "z", "0")" data-rotate-x="@GetAttr("slide-4", "rotate-x", "0")" data-rotate-y="@GetAttr("slide-4", "rotate-y", "0")" data-rotate="@GetAttr("slide-4", "rotate", "0")" data-scale="@GetAttr("slide-4", "scale", "1")">
+        <div class="slide-content">
+            <h2>3D Space Navigation</h2>
+            <p class="zoom-info">This presentation uses Z-axis positioning for depth!</p>
+            <div class="cube-demo">
+                <div class="cube-face front">Front</div>
+                <div class="cube-face back">Back</div>
+                <div class="cube-face right">Right</div>
+                <div class="cube-face left">Left</div>
+                <div class="cube-face top">Top</div>
+                <div class="cube-face bottom">Bottom</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Slide 5: Web Development Stack -->
+    <div id="slide-5" class="step slide" data-x="@GetAttr("slide-5", "x", "0")" data-y="@GetAttr("slide-5", "y", "1000")" data-z="@GetAttr("slide-5", "z", "0")" data-rotate-x="@GetAttr("slide-5", "rotate-x", "0")" data-rotate-y="@GetAttr("slide-5", "rotate-y", "0")" data-rotate="@GetAttr("slide-5", "rotate", "90")" data-scale="@GetAttr("slide-5", "scale", "1")">
+        <div class="slide-content">
+            <h2>Web Stack Integration</h2>
+            <div class="tech-stack">
+                <div class="tech-item">
+                    <div class="tech-circle">ASP.NET Core</div>
+                    <p>Backend Server</p>
+                </div>
+                <div class="tech-item">
+                    <div class="tech-circle">impress.js</div>
+                    <p>Presentation Layer</p>
+                </div>
+                <div class="tech-item">
+                    <div class="tech-circle">JavaScript</div>
+                    <p>Interactivity</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Slide 6: Navigation Controls -->
+    <div id="slide-6" class="step slide" data-x="@GetAttr("slide-6", "x", "-1000")" data-y="@GetAttr("slide-6", "y", "0")" data-z="@GetAttr("slide-6", "z", "0")" data-rotate-x="@GetAttr("slide-6", "rotate-x", "0")" data-rotate-y="@GetAttr("slide-6", "rotate-y", "0")" data-rotate="@GetAttr("slide-6", "rotate", "-90")" data-scale="@GetAttr("slide-6", "scale", "1")">
+        <div class="slide-content">
+            <h2>How to Navigate</h2>
+            <div class="controls">
+                <div class="control-row">
+                    <span class="key">→ / ↓</span>
+                    <span>Next slide</span>
+                </div>
+                <div class="control-row">
+                    <span class="key">← / ↑</span>
+                    <span>Previous slide</span>
+                </div>
+                <div class="control-row">
+                    <span class="key">Home</span>
+                    <span>First slide</span>
+                </div>
+                <div class="control-row">
+                    <span class="key">End</span>
+                    <span>Last slide</span>
+                </div>
+                <div class="control-row">
+                    <span class="key">ESC</span>
+                    <span>Slide overview</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Slide 7: Conclusion -->
+    <div id="slide-7" class="step slide" data-x="@GetAttr("slide-7", "x", "0")" data-y="@GetAttr("slide-7", "y", "2000")" data-z="@GetAttr("slide-7", "z", "0")" data-rotate-x="@GetAttr("slide-7", "rotate-x", "0")" data-rotate-y="@GetAttr("slide-7", "rotate-y", "0")" data-rotate="@GetAttr("slide-7", "rotate", "180")" data-scale="@GetAttr("slide-7", "scale", "1")">
+        <div class="slide-content conclusion-slide">
+            <h2>Thank You!</h2>
+            <p>Questions?</p>
+            <div class="final-note">
+                <p>Built with:</p>
+                <ul>
+                    <li>ASP.NET Core 10.0</li>
+                    <li>impress.js</li>
+                    <li>Modern CSS & JavaScript</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- Overview Slide -->
+    <div id="overview" class="step" data-x="@GetAttr("overview", "x", "500")" data-y="@GetAttr("overview", "y", "1000")" data-z="@GetAttr("overview", "z", "3000")" data-rotate-x="@GetAttr("overview", "rotate-x", "0")" data-rotate-y="@GetAttr("overview", "rotate-y", "0")" data-rotate="@GetAttr("overview", "rotate", "0")" data-scale="@GetAttr("overview", "scale", "6")">
+    </div>
+</div>
+
+<!-- Navigation Buttons -->
+<div class="navigation">
+    <button id="prev-btn" class="nav-btn" title="Previous slide">&larr;</button>
+    <div class="slide-counter">
+        <span id="current-slide">1</span> / <span id="total-slides">7</span>
+    </div>
+    <button id="next-btn" class="nav-btn" title="Next slide">&rarr;</button>
+    <a href="/admin" class="nav-btn admin-link" title="Admin Settings">⚙️</a>
+</div>
+
+<link rel="stylesheet" href="~/css/presentation.css">
+<!-- Three.js & CSS3DRenderer -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/renderers/CSS3DRenderer.js"></script>
+<!-- GSAP for smooth animations -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+
+<script src="~/js/presentation.js"></script>

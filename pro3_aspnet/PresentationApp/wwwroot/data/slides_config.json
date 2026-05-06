@@ -1,0 +1,74 @@
+{
+  "slide-1": {
+    "X": 30,
+    "Y": -30,
+    "Z": 0,
+    "RotateX": 0,
+    "RotateY": 0,
+    "RotateZ": 0,
+    "Scale": 1
+  },
+  "slide-2": {
+    "X": 2525,
+    "Y": 320,
+    "Z": 0,
+    "RotateX": 0,
+    "RotateY": 0,
+    "RotateZ": 0,
+    "Scale": 0.21
+  },
+  "slide-3": {
+    "X": 4463.5996,
+    "Y": 0,
+    "Z": 0,
+    "RotateX": 0,
+    "RotateY": 0,
+    "RotateZ": 0,
+    "Scale": 1
+  },
+  "slide-4": {
+    "X": 1642,
+    "Y": 933,
+    "Z": 0,
+    "RotateX": -38.388172,
+    "RotateY": -22.345354,
+    "RotateZ": 17,
+    "Scale": 1
+  },
+  "slide-5": {
+    "X": -281,
+    "Y": 619,
+    "Z": 0,
+    "RotateX": 0,
+    "RotateY": 0,
+    "RotateZ": 0,
+    "Scale": 1
+  },
+  "slide-6": {
+    "X": -1500.9258,
+    "Y": 0,
+    "Z": 0,
+    "RotateX": -36.09634,
+    "RotateY": 43.544792,
+    "RotateZ": 6.8754935,
+    "Scale": 0.38
+  },
+  "slide-7": {
+    "X": 0,
+    "Y": 2000,
+    "Z": 0,
+    "RotateX": 0,
+    "RotateY": 0,
+    "RotateZ": 0,
+    "Scale": 1
+  },
+  "overview": {
+    "X": 453,
+    "Y": 1000,
+    "Z": 0,
+    "RotateX": -26.356058,
+    "RotateY": 0,
+    "RotateZ": 0,
+    "Scale": 4.37
+  }
+}

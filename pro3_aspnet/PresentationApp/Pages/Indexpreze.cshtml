@@ -1,0 +1,141 @@
+@page
+@model IndexprezeModel
+@{
+    ViewData["Title"] = "Prezi-Style Editor";
+    // We do NOT use the shared _Layout because we want a 100vh full screen layout without the default navbar
+    Layout = null;
+}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"]</title>
+    <link rel="stylesheet" href="~/css/prezi.css" asp-append-version="true" />
+</head>
+<body>
+    <script>
+        window.PRESENTATION_BG_COLOR = '@(Model.BackgroundColor ?? "#1e293b")';
+        window.PRESENTATION_BG_IMAGE = '@(Model.BackgroundImage ?? "")';
+    </script>
+
+    <div id="prezi-app">
+        <!-- Top Toolbar -->
+        <header class="prezi-topbar">
+            <div class="topbar-left">
+                <span class="topbar-title">Digital Identity: Understanding...</span>
+                <span style="background: #fbbf24; color: white; padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: bold;">Public ▾</span>
+                <button class="topbar-btn">↩</button>
+                <button class="topbar-btn">↪</button>
+                <button class="topbar-btn">☁</button>
+            </div>
+            
+            <div class="topbar-center">
+                <button class="topbar-btn"><span>🖌️</span> Style</button>
+                <button class="topbar-btn" id="btn-add-text"><span>T</span> Text</button>
+                <button class="topbar-btn" id="btn-add-image"><span>🖼️</span> Media</button>
+                <button class="topbar-btn"><span>⬛</span> Shape</button>
+                <button class="topbar-btn"><span>📚</span> Story block</button>
+                <button class="topbar-btn"><span>✨</span> Animation</button>
+                <button class="topbar-btn"><span>•••</span> More</button>
+            </div>
+            
+            <div class="topbar-right">
+                <button id="save-server-btn" class="topbar-btn" style="background: #10b981; color: white; padding: 4px 10px; border-radius: 4px;">💾 Save</button>
+                <span class="topbar-btn" style="font-weight: bold;">+ 230</span>
+                <span style="width: 24px; height: 24px; background: #9ca3af; color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 10px;">👤</span>
+                <button class="present-btn">▶ Present ▾</button>
+                <button class="topbar-btn" style="border: 1px solid #d1d5db; padding: 4px 10px; border-radius: 4px;">📤 Share ▾</button>
+            </div>
+        </header>
+
+        <div class="prezi-main">
+            <!-- Left Sidebar -->
+            <aside class="prezi-sidebar">
+                <div class="add-frame-container">
+                    <button class="add-frame-btn">+ Add frame ▾</button>
+                </div>
+                <div class="frame-list" id="sidebar-frames">
+                    <!-- Javascript will populate this with thumbnails -->
+                </div>
+            </aside>
+
+            <!-- Canvas Area -->
+            <main class="prezi-canvas-container" id="presentation-container">
+                @foreach (var slide in Model.Presentation.Slides)
+                {
+                    <div id="@slide.Id" class="step slide" 
+                         data-x="@slide.X.ToString(System.Globalization.CultureInfo.InvariantCulture)" 
+                         data-y="@slide.Y.ToString(System.Globalization.CultureInfo.InvariantCulture)" 
+                         data-scale="@slide.Scale.ToString(System.Globalization.CultureInfo.InvariantCulture)"
+                         data-bgcolor="@slide.BgColor"
+                         data-opacity="@slide.BgOpacity.ToString(System.Globalization.CultureInfo.InvariantCulture)">
+                        
+                        @if (slide.Id != "overview")
+                        {
+                            <div class="slide-content" style="background-color: @(slide.BgColor); opacity: @(slide.BgOpacity.ToString(System.Globalization.CultureInfo.InvariantCulture));">
+                                @foreach (var el in slide.Elements)
+                                {
+                                    <div id="@el.Id" class="slide-element" data-type="@el.Type" 
+                                         style="position: absolute; left: @(el.X.ToString(System.Globalization.CultureInfo.InvariantCulture))px; top: @(el.Y.ToString(System.Globalization.CultureInfo.InvariantCulture))px; width: @(el.Width.ToString(System.Globalization.CultureInfo.InvariantCulture))px; height: @(el.Height.ToString(System.Globalization.CultureInfo.InvariantCulture))px;">
+                                        @Html.Raw(el.Content)
+                                    </div>
+                                }
+                            </div>
+                        }
+                    </div>
+                }
+            </main>
+            
+            <!-- Bottom Controls inside Canvas -->
+            <div class="prezi-bottom-bar">
+                <button class="bottom-btn">🖐️</button>
+                <button class="bottom-btn">🖱️</button>
+                <div style="width: 1px; height: 16px; background: #e5e7eb; margin: 0 5px;"></div>
+                <button class="bottom-btn" id="prev-btn">&larr;</button>
+                <button class="bottom-btn" id="next-btn">&rarr;</button>
+                <button class="bottom-btn" onclick="gotoSlide(0)">🏠</button>
+                <button class="bottom-btn">-</button>
+                <span class="zoom-text">100%</span>
+                <button class="bottom-btn">+</button>
+            </div>
+            
+            <!-- Floating corners -->
+            <button class="topbar-btn" style="position: absolute; bottom: 20px; right: 80px; background: white; padding: 6px 12px; border-radius: 4px; box-shadow: 0 2px 5px rgba(0,0,0,0.1);">📝 Notes</button>
+            <button class="topbar-btn" style="position: absolute; bottom: 20px; right: 20px; background: white; padding: 6px 12px; border-radius: 4px; box-shadow: 0 2px 5px rgba(0,0,0,0.1);">❓ Help</button>
+        </div>
+        </div>
+
+        <!-- Inline Text Formatting Toolbar -->
+        <div id="text-format-toolbar" class="text-format-toolbar" style="display: none;">
+            <div class="format-group">
+                <button class="format-btn" data-command="bold" title="Bold (Ctrl+B)"><b>B</b></button>
+                <button class="format-btn" data-command="italic" title="Italic (Ctrl+I)"><i>I</i></button>
+                <button class="format-btn" data-command="underline" title="Underline (Ctrl+U)"><u>U</u></button>
+            </div>
+            <div class="format-separator"></div>
+            <div class="format-group">
+                <button class="format-btn" data-command="justifyLeft" title="Align Left">⤆</button>
+                <button class="format-btn" data-command="justifyCenter" title="Align Center">⬌</button>
+                <button class="format-btn" data-command="justifyRight" title="Align Right">⤇</button>
+            </div>
+            <div class="format-separator"></div>
+            <div class="format-group">
+                <button class="format-btn" data-command="decreaseFontSize" title="Decrease Font Size">A-</button>
+                <button class="format-btn" data-command="increaseFontSize" title="Increase Font Size">A+</button>
+            </div>
+            <div class="format-separator"></div>
+            <div class="format-group" style="position: relative;">
+                <label title="Text Color" style="cursor:pointer; display:flex; align-items:center; justify-content:center; width:24px; height:24px; border-radius:4px;">
+                    <span style="font-weight:bold; font-family:serif;">A</span>
+                    <input type="color" id="text-color-picker" style="opacity:0; position:absolute; left:0; top:0; width:100%; height:100%; cursor:pointer;">
+                </label>
+            </div>
+        </div>
+    </div>    <!-- Scripts -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/renderers/CSS3DRenderer.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="~/js/prezi.js" asp-append-version="true"></script>
+</body>
+</html>

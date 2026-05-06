@@ -1,0 +1,74 @@
+{
+  "Slides": [
+    {
+      "Id": "overview",
+      "X": 500,
+      "Y": 0,
+      "Z": 0,
+      "Scale": 4,
+      "BgColor": "#ffffff",
+      "BgOpacity": 0.6,
+      "Elements": []
+    },
+    {
+      "Id": "slide-1",
+      "X": -2753,
+      "Y": 64,
+      "Z": 0,
+      "Scale": 1,
+      "BgColor": "#75d912",
+      "BgOpacity": 1,
+      "Elements": [
+        {
+          "Id": "el-1",
+          "Type": "text",
+          "Content": "\n                                        \n                                        \n                                        \n                                        \u003Ch1\u003E\u0431\u0430\u044F\u0440\u043B\u0430\u043B\u0430\u0430\u003C/h1\u003E\n                                    \n                                    \n                                    \n                                    ",
+          "X": 86,
+          "Y": 56.75,
+          "Width": 800,
+          "Height": 100
+        }
+      ]
+    },
+    {
+      "Id": "slide-1778046975490",
+      "X": 3547.3966830104505,
+      "Y": -1505.8053082117726,
+      "Z": 0,
+      "Scale": 1,
+      "BgColor": "#396afe",
+      "BgOpacity": 0.6,
+      "Elements": []
+    },
+    {
+      "Id": "slide-1778046975018",
+      "X": 848,
+      "Y": 1126,
+      "Z": 0,
+      "Scale": 2.16,
+      "BgColor": "#ff0000",
+      "BgOpacity": 0.4,
+      "Elements": [
+        {
+          "Id": "el-1778047030738",
+          "Type": "text",
+          "Content": "\n                                        \n                                        \n                                        \u003Ch2\u003E\u0430\u0433\u0443\u0443\u043B\u0433\u0430\u003C/h2\u003E\n                                    \n                                    \n                                    ",
+          "X": 257,
+          "Y": 101.75,
+          "Width": 300,
+          "Height": 100
+        }
+      ]
+    },
+    {
+      "Id": "slide-1778049542858",
+      "X": 2048,
+      "Y": 1126,
+      "Z": 0,
+      "Scale": 1,
+      "BgColor": "#ffffff",
+      "BgOpacity": 1,
+      "Elements": []
+    }
+  ]
+}
