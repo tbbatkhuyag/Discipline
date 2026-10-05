@@ -1,138 +1,494 @@
 @page
 @model IndexprezeModel
 @{
-    ViewData["Title"] = "Prezi-Style Editor";
-    // We do NOT use the shared _Layout because we want a 100vh full screen layout without the default navbar
+    ViewData["Title"] = Model.Presentation.Title ?? "Prezi Studio Pro - 3D Presentation Editor";
     Layout = null;
 }
 <!DOCTYPE html>
-<html lang="en">
+<html lang="mn">
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>@ViewData["Title"]</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="~/css/prezi.css" asp-append-version="true" />
 </head>
-<body>
+<body class="theme-@(Model.Presentation.Theme ?? "cosmic")">
     <script>
-        window.PRESENTATION_BG_COLOR = '@(Model.BackgroundColor ?? "#1e293b")';
+        window.PRESENTATION_DATA = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.Presentation, new System.Text.Json.JsonSerializerOptions { PropertyNamingPolicy = null }));
+        window.PRESENTATION_BG_COLOR = '@(Model.BackgroundColor ?? "#0b1120")';
         window.PRESENTATION_BG_IMAGE = '@(Model.BackgroundImage ?? "")';
     </script>
 
     <div id="prezi-app">
-        <!-- Top Toolbar -->
+        <!-- Top App Toolbar -->
         <header class="prezi-topbar">
             <div class="topbar-left">
-                <span class="topbar-title">Digital Identity: Understanding...</span>
-                <span style="background: #fbbf24; color: white; padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: bold;">Public ▾</span>
-                <button class="topbar-btn">↩</button>
-                <button class="topbar-btn">↪</button>
-                <button class="topbar-btn">☁</button>
+                <div class="app-logo">
+                    <span class="logo-icon">✦</span>
+                    <span class="logo-text">PREZI <span class="logo-pro">PRO</span></span>
+                </div>
+                <div class="divider-v"></div>
+                <div class="title-container" title="Нэр өөрчлөх бол дарна уу">
+                    <input type="text" id="presentation-title-input" class="presentation-title-input" value="@Model.Presentation.Title" spellcheck="false" />
+                    <span class="edit-icon">✏️</span>
+                </div>
+                <span id="save-status-badge" class="status-badge saved">
+                    <span class="status-dot"></span> Хадгалагдсан
+                </span>
+                <div class="undo-redo-group">
+                    <button id="btn-undo" class="icon-tool-btn" title="Буцах (Ctrl+Z)" disabled>↩</button>
+                    <button id="btn-redo" class="icon-tool-btn" title="Дахин хийх (Ctrl+Y)" disabled>↪</button>
+                </div>
             </div>
             
             <div class="topbar-center">
-                <button class="topbar-btn"><span>🖌️</span> Style</button>
-                <button class="topbar-btn" id="btn-add-text"><span>T</span> Text</button>
-                <button class="topbar-btn" id="btn-add-image"><span>🖼️</span> Media</button>
-                <button class="topbar-btn"><span>⬛</span> Shape</button>
-                <button class="topbar-btn"><span>📚</span> Story block</button>
-                <button class="topbar-btn"><span>✨</span> Animation</button>
-                <button class="topbar-btn"><span>•••</span> More</button>
+                <!-- Add Slide Dropdown -->
+                <div class="dropdown-wrapper">
+                    <button id="btn-add-slide-menu" class="action-pill-btn primary">
+                        <span class="btn-icon">➕</span>
+                        <span>Слайд нэмэх</span>
+                        <span class="caret">▾</span>
+                    </button>
+                    <div id="slide-template-dropdown" class="dropdown-menu">
+                        <div class="dropdown-header">Бэлэн загвар сонгох</div>
+                        <button class="template-item" data-template="hero">
+                            <span class="tpl-icon">🌟</span>
+                            <div class="tpl-info">
+                                <span class="tpl-title">Танилцуулга (Hero)</span>
+                                <span class="tpl-desc">Гарчиг, тайлбар, багийн мэдээлэл</span>
+                            </div>
+                        </button>
+                        <button class="template-item" data-template="three-cards">
+                            <span class="tpl-icon">📊</span>
+                            <div class="tpl-info">
+                                <span class="tpl-title">3 Багана (KPI & Үзүүлэлт)</span>
+                                <span class="tpl-desc">3 шилэн карт, тоон үзүүлэлт</span>
+                            </div>
+                        </button>
+                        <button class="template-item" data-template="split-feature">
+                            <span class="tpl-icon">💡</span>
+                            <div class="tpl-info">
+                                <span class="tpl-title">Зураг + Жагсаалт (Split)</span>
+                                <span class="tpl-desc">Зүүн зураг, баруун давуу талууд</span>
+                            </div>
+                        </button>
+                        <button class="template-item" data-template="timeline">
+                            <span class="tpl-icon">🚀</span>
+                            <div class="tpl-info">
+                                <span class="tpl-title">Хөгжлийн үе шат (Roadmap)</span>
+                                <span class="tpl-desc">4 дараалсан үе шат, төлөвлөгөө</span>
+                            </div>
+                        </button>
+                        <button class="template-item" data-template="quote">
+                            <span class="tpl-icon">💬</span>
+                            <div class="tpl-info">
+                                <span class="tpl-title">Ишлэл & Дүгнэлт (Quote)</span>
+                                <span class="tpl-desc">Том эшлэл, гол санаа</span>
+                            </div>
+                        </button>
+                        <button class="template-item" data-template="circle">
+                            <span class="tpl-icon">⭕</span>
+                            <div class="tpl-info">
+                                <span class="tpl-title">Прези Тойрог Сэдэв (Bubble)</span>
+                                <span class="tpl-desc">Прези стилийн дугуй сэдэв</span>
+                            </div>
+                        </button>
+                        <button class="template-item" data-template="blank">
+                            <span class="tpl-icon">📄</span>
+                            <div class="tpl-info">
+                                <span class="tpl-title">Хоосон Слайд (Blank)</span>
+                                <span class="tpl-desc">Өөрөө чөлөөтэй дизайн хийх</span>
+                            </div>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Insert Text Button -->
+                <button class="action-pill-btn" id="btn-add-text" title="Шинэ бичвэр оруулах">
+                    <span class="btn-icon">T</span>
+                    <span>Текст</span>
+                </button>
+
+                <!-- Insert Media Button -->
+                <button class="action-pill-btn" id="btn-open-media-modal" title="Зураг болон медиа файл оруулах">
+                    <span class="btn-icon">🖼️</span>
+                    <span>Зураг оруулах</span>
+                </button>
+
+                <!-- Shapes & Badges Button -->
+                <div class="dropdown-wrapper">
+                    <button id="btn-shapes-menu" class="action-pill-btn" title="Дүрс, карт болон бэлэн элементүүд">
+                        <span class="btn-icon">🔷</span>
+                        <span>Дүрс & Карт</span>
+                        <span class="caret">▾</span>
+                    </button>
+                    <div id="shapes-dropdown" class="dropdown-menu">
+                        <div class="dropdown-header">Бэлэн элемент оруулах</div>
+                        <button class="template-item" data-shape="stat-card">
+                            <span class="tpl-icon">📈</span>
+                            <div class="tpl-info"><span class="tpl-title">Үзүүлэлтийн карт</span><span class="tpl-desc">+250% Амжилт</span></div>
+                        </button>
+                        <button class="template-item" data-shape="badge-pill">
+                            <span class="tpl-icon">🏷️</span>
+                            <div class="tpl-info"><span class="tpl-title">Шошго (Badge)</span><span class="tpl-desc">Онцлох товч</span></div>
+                        </button>
+                        <button class="template-item" data-shape="icon-card">
+                            <span class="tpl-icon">⚡</span>
+                            <div class="tpl-info"><span class="tpl-title">Айконтой хайрцаг</span><span class="tpl-desc">Мэдээллийн блок</span></div>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Quick Outline Importer (Агуулга хялбар оруулах) -->
+                <button class="action-pill-btn highlight-accent" id="btn-open-importer" title="Бичвэрээ хуулаад шууд бүтэн танилцуулга үүсгэх">
+                    <span class="btn-icon">⚡</span>
+                    <span>Хялбар агуулга бэлдэх</span>
+                </button>
             </div>
             
             <div class="topbar-right">
-                <button id="save-server-btn" class="topbar-btn" style="background: #10b981; color: white; padding: 4px 10px; border-radius: 4px;">💾 Save</button>
-                <span class="topbar-btn" style="font-weight: bold;">+ 230</span>
-                <span style="width: 24px; height: 24px; background: #9ca3af; color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 10px;">👤</span>
-                <button class="present-btn">▶ Present ▾</button>
-                <button class="topbar-btn" style="border: 1px solid #d1d5db; padding: 4px 10px; border-radius: 4px;">📤 Share ▾</button>
+                <!-- Theme selector -->
+                <div class="dropdown-wrapper">
+                    <button id="btn-theme-menu" class="icon-tool-btn" title="Загварын өнгө солих">
+                        <span>🎨</span>
+                    </button>
+                    <div id="theme-dropdown" class="dropdown-menu right-aligned">
+                        <div class="dropdown-header">Өнгөний загвар</div>
+                        <button class="template-item theme-option" data-theme="cosmic">
+                            <span class="color-preview cosmic"></span>
+                            <span class="tpl-title">🌌 Сансрын цэнхэр (Cosmic)</span>
+                        </button>
+                        <button class="template-item theme-option" data-theme="slate">
+                            <span class="color-preview slate"></span>
+                            <span class="tpl-title">💎 Харанхуй металл (Slate)</span>
+                        </button>
+                        <button class="template-item theme-option" data-theme="emerald">
+                            <span class="color-preview emerald"></span>
+                            <span class="tpl-title">🟢 Кибер маргад (Emerald)</span>
+                        </button>
+                        <button class="template-item theme-option" data-theme="purple">
+                            <span class="color-preview purple"></span>
+                            <span class="tpl-title">🔮 Нео нил ягаан (Neon)</span>
+                        </button>
+                        <button class="template-item theme-option" data-theme="light">
+                            <span class="color-preview light"></span>
+                            <span class="tpl-title">☀️ Цэвэр цагаан (Light)</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Save Button -->
+                <button id="save-server-btn" class="save-main-btn" title="Серверт хадгалах (Ctrl+S)">
+                    <span class="btn-icon">💾</span>
+                    <span>Хадгалах</span>
+                </button>
+
+                <!-- Export/Import / More Actions -->
+                <div class="dropdown-wrapper">
+                    <button id="btn-more-menu" class="icon-tool-btn" title="Нэмэлт тохиргоо, экспорт">
+                        <span>⚙️</span>
+                    </button>
+                    <div id="more-dropdown" class="dropdown-menu right-aligned">
+                        <button class="template-item" id="btn-export-json">
+                            <span class="tpl-icon">📥</span>
+                            <span class="tpl-title">Танилцуулгыг JSON татах</span>
+                        </button>
+                        <button class="template-item" id="btn-import-json-trigger">
+                            <span class="tpl-icon">📤</span>
+                            <span class="tpl-title">JSON файл оруулах</span>
+                        </button>
+                        <input type="file" id="json-file-input" accept=".json" style="display:none;" />
+                        <div class="dropdown-divider"></div>
+                        <button class="template-item" id="btn-load-pro-template">
+                            <span class="tpl-icon">🔄</span>
+                            <span class="tpl-title">Бэлэн загвараар шинэчлэх</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Present Mode Button -->
+                <button class="present-btn" id="btn-present-mode" title="Бүтэн дэлгэцээр танилцуулах (F5)">
+                    <span class="btn-icon">▶</span>
+                    <span>Танилцуулах</span>
+                </button>
             </div>
         </header>
 
         <div class="prezi-main">
-            <!-- Left Sidebar -->
+            <!-- Left Sidebar: Slides & Path sequence -->
             <aside class="prezi-sidebar">
-                <div class="add-frame-container">
-                    <button class="add-frame-btn">+ Add frame ▾</button>
+                <div class="sidebar-header">
+                    <div class="sidebar-title-row">
+                        <span class="sidebar-heading">🛣️ Шилжилтийн дараалал</span>
+                        <span class="sidebar-badge" id="slide-count-badge">0</span>
+                    </div>
+                    <button class="add-frame-quick-btn" id="btn-quick-add-slide" title="Дараагийн слайд нэмэх">
+                        <span>+ Слайд нэмэх</span>
+                    </button>
                 </div>
+                
                 <div class="frame-list" id="sidebar-frames">
-                    <!-- Javascript will populate this with thumbnails -->
+                    <!-- Javascript will dynamically populate this -->
+                </div>
+
+                <div class="sidebar-footer">
+                    <button class="sidebar-footer-btn" id="btn-sidebar-overview" title="Бүх сэдвийн тоймыг харах">
+                        <span>🌐</span>
+                        <span>Бүх сэдвийн тойм (Overview)</span>
+                    </button>
                 </div>
             </aside>
 
-            <!-- Canvas Area -->
+            <!-- Main Canvas Area -->
             <main class="prezi-canvas-container" id="presentation-container">
-                @foreach (var slide in Model.Presentation.Slides)
-                {
-                    <div id="@slide.Id" class="step slide" 
-                         data-x="@slide.X.ToString(System.Globalization.CultureInfo.InvariantCulture)" 
-                         data-y="@slide.Y.ToString(System.Globalization.CultureInfo.InvariantCulture)" 
-                         data-scale="@slide.Scale.ToString(System.Globalization.CultureInfo.InvariantCulture)"
-                         data-bgcolor="@slide.BgColor"
-                         data-opacity="@slide.BgOpacity.ToString(System.Globalization.CultureInfo.InvariantCulture)">
-                        
-                        @if (slide.Id != "overview")
-                        {
-                            <div class="slide-content" style="background-color: @(slide.BgColor); opacity: @(slide.BgOpacity.ToString(System.Globalization.CultureInfo.InvariantCulture));">
-                                @foreach (var el in slide.Elements)
-                                {
-                                    <div id="@el.Id" class="slide-element" data-type="@el.Type" 
-                                         style="position: absolute; left: @(el.X.ToString(System.Globalization.CultureInfo.InvariantCulture))px; top: @(el.Y.ToString(System.Globalization.CultureInfo.InvariantCulture))px; width: @(el.Width.ToString(System.Globalization.CultureInfo.InvariantCulture))px; height: @(el.Height.ToString(System.Globalization.CultureInfo.InvariantCulture))px;">
-                                        @Html.Raw(el.Content)
-                                    </div>
-                                }
-                            </div>
-                        }
-                    </div>
-                }
+                <!-- Three.js CSS3D Canvas is inserted here -->
+                
+                <!-- Dynamic SVG Path Overlay (Connecting lines between slides) -->
+                <svg id="prezi-path-svg" class="prezi-path-svg">
+                    <defs>
+                        <linearGradient id="pathGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                            <stop offset="0%" stop-color="#38bdf8" stop-opacity="0.8" />
+                            <stop offset="50%" stop-color="#818cf8" stop-opacity="0.9" />
+                            <stop offset="100%" stop-color="#c084fc" stop-opacity="0.8" />
+                        </linearGradient>
+                        <filter id="pathGlow">
+                            <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
+                            <feMerge>
+                                <feMergeNode in="coloredBlur"/>
+                                <feMergeNode in="SourceGraphic"/>
+                            </feMerge>
+                        </filter>
+                    </defs>
+                    <g id="path-lines-group"></g>
+                </svg>
+
+                <!-- Hidden initial DOM slides structure that Three.js will parse and attach -->
+                <div id="slides-dom-source" style="display:none;">
+                    @foreach (var slide in Model.Presentation.Slides)
+                    {
+                        <div id="@slide.Id" class="step slide slide-shape-@(slide.Shape ?? "rounded")" 
+                             data-title="@slide.Title"
+                             data-x="@slide.X.ToString(System.Globalization.CultureInfo.InvariantCulture)" 
+                             data-y="@slide.Y.ToString(System.Globalization.CultureInfo.InvariantCulture)" 
+                             data-z="@slide.Z.ToString(System.Globalization.CultureInfo.InvariantCulture)"
+                             data-rotate="@slide.Rotate.ToString(System.Globalization.CultureInfo.InvariantCulture)"
+                             data-scale="@slide.Scale.ToString(System.Globalization.CultureInfo.InvariantCulture)"
+                             data-shape="@(slide.Shape ?? "rounded")"
+                             data-bgcolor="@slide.BgColor"
+                             data-opacity="@slide.BgOpacity.ToString(System.Globalization.CultureInfo.InvariantCulture)"
+                             data-bordercolor="@(slide.BorderColor ?? "rgba(255,255,255,0.2)")"
+                             data-accentcolor="@(slide.AccentColor ?? "#3b82f6")">
+                            
+                            @if (slide.Id != "overview")
+                            {
+                                <div class="slide-content" style="background-color: @(slide.BgColor); opacity: @(slide.BgOpacity.ToString(System.Globalization.CultureInfo.InvariantCulture)); border-color: @(slide.BorderColor ?? "rgba(255,255,255,0.2)");">
+                                    @foreach (var el in slide.Elements)
+                                    {
+                                        <div id="@el.Id" class="slide-element" data-type="@el.Type" 
+                                             style="position: absolute; left: @(el.X.ToString(System.Globalization.CultureInfo.InvariantCulture))px; top: @(el.Y.ToString(System.Globalization.CultureInfo.InvariantCulture))px; width: @(el.Width.ToString(System.Globalization.CultureInfo.InvariantCulture))px; height: @(el.Height.ToString(System.Globalization.CultureInfo.InvariantCulture))px; @el.Style">
+                                            @Html.Raw(el.Content)
+                                        </div>
+                                    }
+                                </div>
+                            }
+                        </div>
+                    }
+                </div>
             </main>
-            
-            <!-- Bottom Controls inside Canvas -->
+
+            <!-- Bottom Floating Controls inside Canvas -->
             <div class="prezi-bottom-bar">
-                <button class="bottom-btn">🖐️</button>
-                <button class="bottom-btn">🖱️</button>
-                <div style="width: 1px; height: 16px; background: #e5e7eb; margin: 0 5px;"></div>
-                <button class="bottom-btn" id="prev-btn">&larr;</button>
-                <button class="bottom-btn" id="next-btn">&rarr;</button>
-                <button class="bottom-btn" onclick="gotoSlide(0)">🏠</button>
-                <button class="bottom-btn">-</button>
-                <span class="zoom-text">100%</span>
-                <button class="bottom-btn">+</button>
+                <button class="bottom-btn" id="btn-tool-hand" title="Гар горим (Хуудас гүйлгэх)">🖐️</button>
+                <button class="bottom-btn active" id="btn-tool-select" title="Сонгох горим (Засварлах)">🖱️</button>
+                <div class="bottom-separator"></div>
+                <button class="bottom-btn" id="prev-btn" title="Өмнөх сэдэв (Зүүн сум)">◀</button>
+                <span class="slide-counter-hud" id="hud-slide-counter">1 / 5</span>
+                <button class="bottom-btn" id="next-btn" title="Дараагийн сэдэв (Баруун сум)">▶</button>
+                <div class="bottom-separator"></div>
+                <button class="bottom-btn" id="btn-zoom-overview" title="Бүх сэдвийн тойм (Home)">🏠 Тойм</button>
+                <button class="bottom-btn" id="btn-zoom-out" title="Жижигрүүлэх">-</button>
+                <span class="zoom-text" id="zoom-level-label">100%</span>
+                <button class="bottom-btn" id="btn-zoom-in" title="Томосгох">+</button>
+                <div class="bottom-separator"></div>
+                <button class="bottom-btn" id="btn-toggle-paths" title="Шилжилтийн шугамыг харуулах/нуух">🛣️</button>
+                <button class="bottom-btn" id="btn-toggle-inspector" title="Слайдын тохиргоо (Inspector)">⚙️ Тохиргоо</button>
             </div>
-            
-            <!-- Floating corners -->
-            <button class="topbar-btn" style="position: absolute; bottom: 20px; right: 80px; background: white; padding: 6px 12px; border-radius: 4px; box-shadow: 0 2px 5px rgba(0,0,0,0.1);">📝 Notes</button>
-            <button class="topbar-btn" style="position: absolute; bottom: 20px; right: 20px; background: white; padding: 6px 12px; border-radius: 4px; box-shadow: 0 2px 5px rgba(0,0,0,0.1);">❓ Help</button>
-        </div>
+
+            <!-- Right Inspector Panel (Slide & Element Properties) -->
+            <aside class="prezi-inspector" id="prezi-inspector">
+                <div class="inspector-header">
+                    <span id="inspector-target-title">🎯 Слайдын тохиргоо</span>
+                    <button class="close-inspector-btn" id="btn-close-inspector">&times;</button>
+                </div>
+                <div class="inspector-body" id="inspector-body">
+                    <!-- Dynamic properties will be populated here -->
+                </div>
+            </aside>
         </div>
 
-        <!-- Inline Text Formatting Toolbar -->
+        <!-- Inline Floating Text Formatting Toolbar -->
         <div id="text-format-toolbar" class="text-format-toolbar" style="display: none;">
             <div class="format-group">
-                <button class="format-btn" data-command="bold" title="Bold (Ctrl+B)"><b>B</b></button>
-                <button class="format-btn" data-command="italic" title="Italic (Ctrl+I)"><i>I</i></button>
-                <button class="format-btn" data-command="underline" title="Underline (Ctrl+U)"><u>U</u></button>
+                <select id="format-heading-select" class="format-select" title="Гарчгийн хэлбэр">
+                    <option value="p">Энгийн эх бичвэр</option>
+                    <option value="h1">Том гарчиг (H1)</option>
+                    <option value="h2">Дэд гарчиг (H2)</option>
+                    <option value="h3">Жижиг гарчиг (H3)</option>
+                </select>
             </div>
             <div class="format-separator"></div>
             <div class="format-group">
-                <button class="format-btn" data-command="justifyLeft" title="Align Left">⤆</button>
-                <button class="format-btn" data-command="justifyCenter" title="Align Center">⬌</button>
-                <button class="format-btn" data-command="justifyRight" title="Align Right">⤇</button>
+                <button class="format-btn" data-command="bold" title="Тод (Ctrl+B)"><b>B</b></button>
+                <button class="format-btn" data-command="italic" title="Налуу (Ctrl+I)"><i>I</i></button>
+                <button class="format-btn" data-command="underline" title="Доогуур зураас (Ctrl+U)"><u>U</u></button>
             </div>
             <div class="format-separator"></div>
             <div class="format-group">
-                <button class="format-btn" data-command="decreaseFontSize" title="Decrease Font Size">A-</button>
-                <button class="format-btn" data-command="increaseFontSize" title="Increase Font Size">A+</button>
+                <button class="format-btn" data-command="justifyLeft" title="Зүүн тийш">⤆</button>
+                <button class="format-btn" data-command="justifyCenter" title="Төвд">⬌</button>
+                <button class="format-btn" data-command="justifyRight" title="Баруун тийш">⤇</button>
             </div>
             <div class="format-separator"></div>
-            <div class="format-group" style="position: relative;">
-                <label title="Text Color" style="cursor:pointer; display:flex; align-items:center; justify-content:center; width:24px; height:24px; border-radius:4px;">
-                    <span style="font-weight:bold; font-family:serif;">A</span>
-                    <input type="color" id="text-color-picker" style="opacity:0; position:absolute; left:0; top:0; width:100%; height:100%; cursor:pointer;">
+            <div class="format-group">
+                <button class="format-btn" data-command="insertUnorderedList" title="Жагсаалт">☰</button>
+            </div>
+            <div class="format-separator"></div>
+            <div class="format-group color-picker-group">
+                <label class="color-picker-label" title="Үсгийн өнгө">
+                    <span class="color-preview-letter">A</span>
+                    <input type="color" id="text-color-picker" value="#ffffff" />
                 </label>
             </div>
+            <div class="format-separator"></div>
+            <div class="format-group">
+                <button class="format-btn delete-elem-btn" id="btn-delete-element" title="Устгах (Delete)">🗑️</button>
+                <button class="format-btn duplicate-elem-btn" id="btn-duplicate-element" title="Хувилах (Ctrl+D)">📋</button>
+            </div>
         </div>
-    </div>    <!-- Scripts -->
+
+        <!-- MODAL 1: Quick Outline Importer (Агуулга оруулах) -->
+        <div class="modal-overlay" id="importer-modal" style="display:none;">
+            <div class="modal-card">
+                <div class="modal-header">
+                    <div class="modal-title-group">
+                        <span class="modal-badge">⚡ ШУУРХАЙ БЭЛТГЭХ</span>
+                        <h3>Агуулга хуулаад шууд танилцуулга үүсгэх</h3>
+                    </div>
+                    <button class="modal-close-btn" id="btn-close-importer">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <p class="modal-desc">
+                        Доорх талбарт сэдэв ба дагалдах санаануудаа <code># Сэдэв</code> болон <code>- Дэд санаа</code> байдлаар бичвэл систем автоматаар Prezi 3D орон зайд байрлуулж, мэргэжлийн слайдуудыг үүсгэнэ.
+                    </p>
+                    <div class="importer-templates-bar">
+                        <span class="hint-label">Жишээ бэлэн агуулга:</span>
+                        <button class="sample-fill-btn" data-sample="business">💼 Бизнес стратеги</button>
+                        <button class="sample-fill-btn" data-sample="product">🚀 Бүтээгдэхүүний танилцуулга</button>
+                        <button class="sample-fill-btn" data-sample="project">📊 Төслийн тайлан</button>
+                    </div>
+                    <textarea id="importer-textarea" class="importer-textarea" rows="10" placeholder="# 1. Бидний зорилго
+- Шинэ зах зээлд өрсөлдөх
+- Борлуулалтыг 2 дахин өсгөх
+# 2. Давуу талууд
+- Хурдтай 3D шилжилт
+- Хэрэглэхэд хялбар загвар
+# 3. Хэрэгжүүлэх алхмууд
+- Төлөвлөгөө боловсруулах
+- Системээ нэвтрүүлэх"></textarea>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn-cancel" id="btn-cancel-importer">Болих</button>
+                    <button class="btn-confirm-gradient" id="btn-generate-slides">
+                        <span>✨ Слайдуудыг автоматаар үүсгэх</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- MODAL 2: Media / Image Upload & Picker -->
+        <div class="modal-overlay" id="media-modal" style="display:none;">
+            <div class="modal-card">
+                <div class="modal-header">
+                    <div class="modal-title-group">
+                        <span class="modal-badge">🖼️ МЕДИА САН</span>
+                        <h3>Зураг болон дүрслэл оруулах</h3>
+                    </div>
+                    <button class="modal-close-btn" id="btn-close-media">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <div class="media-tabs">
+                        <button class="media-tab active" data-tab="upload">📁 Компьютерээс хуулах</button>
+                        <button class="media-tab" data-tab="url">🔗 Зургийн холбоос (URL)</button>
+                        <button class="media-tab" data-tab="gallery">🌟 Бэлэн өндөр чанартай зургууд</button>
+                    </div>
+
+                    <!-- Tab 1: File Upload -->
+                    <div class="tab-pane active" id="tab-pane-upload">
+                        <div class="dropzone" id="file-dropzone">
+                            <div class="dropzone-icon">☁️</div>
+                            <h4>Зураг чирж оруулна уу, эсвэл энд дарж сонгоно уу</h4>
+                            <p>PNG, JPG, WEBP, SVG файлуудыг дэмжинэ</p>
+                            <input type="file" id="image-file-input" accept="image/*" style="display:none;" />
+                            <button class="btn-browse-file" onclick="document.getElementById('image-file-input').click();">Зураг сонгох</button>
+                        </div>
+                        <div id="upload-progress-box" style="display:none; margin-top:15px; text-align:center;">
+                            <span class="spinner"></span> Серверт хуулж байна...
+                        </div>
+                    </div>
+
+                    <!-- Tab 2: URL Input -->
+                    <div class="tab-pane" id="tab-pane-url" style="display:none;">
+                        <div class="form-group" style="margin-top:20px;">
+                            <label>Зургийн интернет холбоос (Image URL):</label>
+                            <input type="url" id="image-url-input" class="modern-input" placeholder="https://images.unsplash.com/photo-..." />
+                        </div>
+                        <div style="margin-top:15px; display:flex; justify-content:flex-end;">
+                            <button class="btn-confirm-gradient" id="btn-insert-url-image">Зураг оруулах</button>
+                        </div>
+                    </div>
+
+                    <!-- Tab 3: Curated Gallery -->
+                    <div class="tab-pane" id="tab-pane-gallery" style="display:none;">
+                        <p class="hint-label" style="margin:10px 0;">Нэг товшилтоор слайддаа оруулах бэлэн зургууд:</p>
+                        <div class="gallery-grid" id="curated-gallery-grid">
+                            <!-- Populated with beautiful presets -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- FULLSCREEN PRESENTATION MODE OVERLAY (F5) -->
+        <div id="presentation-fullscreen-hud" class="presentation-fullscreen-hud" style="display:none;">
+            <div class="pres-hud-bar">
+                <button class="pres-hud-btn" id="btn-pres-prev" title="Өмнөх сэдэв">◀</button>
+                <div class="pres-hud-counter" id="pres-hud-counter">1 / 5</div>
+                <button class="pres-hud-btn" id="btn-pres-next" title="Дараагийн сэдэв">▶</button>
+                <div class="pres-hud-divider"></div>
+                <button class="pres-hud-btn" id="btn-pres-overview" title="Бүх сэдвийн тойм (Overview)">🌐 Тойм</button>
+                <button class="pres-hud-btn" id="btn-pres-laser" title="Лазер заагч горим (L)">🔴 Лазер заагч</button>
+                <div class="pres-hud-divider"></div>
+                <div class="pres-timer" id="pres-timer-clock">⏱️ 00:00</div>
+                <button class="pres-hud-btn exit-btn" id="btn-exit-presentation" title="Гарах (Esc)">✕ Гарах</button>
+            </div>
+            <!-- Progress Bar -->
+            <div class="pres-progress-container">
+                <div class="pres-progress-bar" id="pres-progress-bar" style="width: 20%;"></div>
+            </div>
+        </div>
+
+        <!-- Laser Pointer Dot -->
+        <div id="laser-pointer-dot" class="laser-pointer-dot" style="display:none;"></div>
+
+        <!-- Toast Notifications -->
+        <div id="toast-container" class="toast-container"></div>
+    </div>
+
+    <!-- Scripts -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/renderers/CSS3DRenderer.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
